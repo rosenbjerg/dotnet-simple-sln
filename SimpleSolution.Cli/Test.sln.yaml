@@ -1,0 +1,19 @@
+
+configurations:
+  - Debug|Any CPU
+  - Release|Any CPU
+
+projects:
+  - MyProject.csproj
+  - AlsoMyProject
+
+directories:
+  Test:
+    projects:
+      - Tests/MyProject.Test/MyProject.Test.csproj
+      - Tests/AlsoMyProject.Test
+    directories:
+      Deep directory:
+        projects:
+          - DeeplyNested
+          - MyFSharpProj/MyFSharpProj.fsproj
