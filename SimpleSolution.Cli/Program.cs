@@ -1,35 +1,89 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using CommandLine;
 using SimpleSolution.Core;
+using SimpleSolution.Core.Models;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-var specificationFilePath = args.FirstOrDefault() ?? "Test.sln.yaml";
-var scaffold = args.Contains("--scaffold") || true;
+namespace SimpleSolution.Cli;
 
-var started = DateTime.UtcNow;
-
-Console.WriteLine($"Reading solution specification file: {specificationFilePath}");
-var directory = Path.GetDirectoryName(specificationFilePath) ?? ".";
-var solutionName = Path.GetFileNameWithoutExtension(specificationFilePath).Replace(".sln", "");
-
-var yamlSpec = await File.ReadAllTextAsync(specificationFilePath);
-var spec = new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build().Deserialize<SolutionRoot>(yamlSpec);
-
-var solutionId = solutionName.DeriveGuid();
-var references = spec.AggregateReferences(solutionId).ToArray();
-
-Console.WriteLine("Generating sln file content");
-var slnContent = SolutionGenerater.GenerateSolution(solutionId, references, spec.Configurations);
-var outputPath = Path.Combine(directory, $"{solutionName}.sln");
-await File.WriteAllTextAsync(outputPath, slnContent);
-Console.WriteLine($"Solution file '{outputPath}' updated");
-
-if (scaffold)
+internal static class Program
 {
-    ProjectScaffolder.Scaffold(directory, references);
-}
+    private static int Main(string[] args)
+    {
+        var started = DateTime.UtcNow;
+        var result = Parser.Default.ParseArguments<CreateOptions, DeriveOptions, CleanupOptions>(args)
+            .MapResult(
+                (CreateOptions options) => RunCreateAndReturnExitCode(options),
+                (DeriveOptions options) => RunDeriveAndReturnExitCode(options),
+                (CleanupOptions options) => RunCleanupAndReturnExitCode(options),
+                errors => 1);
+        
+        var elapsed = DateTime.UtcNow.Subtract(started).TotalMilliseconds;
+        Console.WriteLine($"Completed in {elapsed}ms");
+        return result;
+    }
 
-var elapsed = DateTime.UtcNow.Subtract(started).TotalMilliseconds;
-Console.WriteLine($"Elapsed: {elapsed}ms");
+    private static int RunCreateAndReturnExitCode(CreateOptions options)
+    {
+        var directory = Path.GetDirectoryName(options.SolutionSpecPath) ?? ".";
+        var solutionName = Path.GetFileNameWithoutExtension(options.SolutionSpecPath).Replace(".sln", "");
+
+        var solutionRoot = ParseYamlSolutionSpecification(options);
+
+        var solutionId = solutionName.DeriveGuid();
+        var references = solutionRoot.AggregateReferences(solutionId).ToArray();
+        WriteSolutionToFile(solutionId, references, solutionRoot, Path.Combine(directory, $"{solutionName}.sln"));
+
+        if (options.ScaffoldProjects)
+        {
+            ProjectScaffolding.Scaffold(directory, references);
+        }
+
+        return 0;
+    }
+
+    private static int RunDeriveAndReturnExitCode(DeriveOptions options)
+    {
+        var solutionSpec = SpecificationDeriver.DeriveFromSolution(options.SolutionPath);
+        WriteSpecificationToFile(options.SolutionPath, solutionSpec);
+
+        return 0;
+    }
+
+    private static int RunCleanupAndReturnExitCode(CleanupOptions options)
+    {
+        var solutionRoot = SpecificationDeriver.DeriveFromSolution(options.SolutionPath);
+        var solutionId = Path.GetFileNameWithoutExtension(options.SolutionPath).DeriveGuid();
+        if (options.CreateSpecificationFile)
+        {
+            WriteSpecificationToFile(options.SolutionPath, solutionRoot);
+        }
+
+        var references = solutionRoot.AggregateReferences(solutionId).ToArray();
+        WriteSolutionToFile(solutionId, references, solutionRoot, options.SolutionPath);
+
+        return 0;
+    }
+
+    private static SolutionRootDirectory ParseYamlSolutionSpecification(CreateOptions options)
+    {
+        var yamlSpecificationContent = File.ReadAllText(options.SolutionSpecPath);
+        return new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build()
+            .Deserialize<SolutionRootDirectory>(yamlSpecificationContent);
+    }
+
+    private static void WriteSolutionToFile(Guid solutionId, SolutionReference[] references, SolutionRootDirectory spec, string solutionPath)
+    {
+        var solutionTextContent = SolutionGeneration.GenerateSolutionContent(solutionId, references, spec.Configurations);
+        File.WriteAllText(solutionPath, solutionTextContent);
+        Console.WriteLine($"Solution file '{solutionPath}' updated");
+    }
+
+    private static void WriteSpecificationToFile(string solutionPath, SolutionRootDirectory solutionSpec)
+    {
+        var yamlSpecificationPath = $"{solutionPath}.yaml";
+        var yamlSpecificationContent = new SerializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build().Serialize(solutionSpec);
+        File.WriteAllText(yamlSpecificationPath, yamlSpecificationContent);
+        Console.WriteLine($"Solution specification file '{yamlSpecificationPath}' created");
+    }
+}

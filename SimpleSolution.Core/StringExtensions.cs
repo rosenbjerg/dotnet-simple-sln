@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text;
+﻿using System.Text;
 
 namespace SimpleSolution.Core;
 
@@ -18,7 +16,7 @@ public static class StringExtensions
 
     public static Guid DeriveGuid(this string input)
     {
-        var hash = GetStableHashCode(input);
+        var hash = GetStableHashCode(input + 347);
         var bytes = Encoding.ASCII.GetBytes(hash.ToString());
         var newArray = new byte[16];
         var startAt = newArray.Length - bytes.Length;
@@ -27,7 +25,7 @@ public static class StringExtensions
     }
 
     // Taken from https://stackoverflow.com/a/36846609
-    public static int GetStableHashCode(this string str)
+    private static int GetStableHashCode(this string str)
     {
         unchecked
         {

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using SimpleSolution.Core.Models;
 
 namespace SimpleSolution.Core;
 
@@ -8,15 +6,15 @@ public static class SolutionRootExtensions
 {
     public static IEnumerable<SolutionReference> AggregateReferences(this SolutionDirectory solutionDirectory, Guid parentGuid)
     {
-        foreach (var project in solutionDirectory.Projects)
+        foreach (var project in solutionDirectory.Projects ?? new())
         {
-            var projectName = Path.GetFileNameWithoutExtension(project);
-            var projectPath = ExpandByConvention(project, projectName);
+            var projectName = SupportedTypes.GetFileNameWithoutProjectExtension(project);
+            var projectPath = ExpandByConvention(project);
             var projectGuid = project.DeriveGuid();
             yield return new SolutionReference(parentGuid, projectName, projectPath.AlignDirectorySeparators(), projectGuid);
         }
 
-        foreach (var subDirectory in solutionDirectory.Directories)
+        foreach (var subDirectory in solutionDirectory.Directories ?? new())
         {
             var subDirectoryGuid = $"{subDirectory.Key}{parentGuid}".DeriveGuid();
             yield return new SolutionReference(parentGuid, subDirectory.Key, subDirectory.Key, subDirectoryGuid);
@@ -28,12 +26,12 @@ public static class SolutionRootExtensions
         }
     }
 
-    private static string ExpandByConvention(string projectPath, string projectName)
+    private static string ExpandByConvention(string projectPath)
     {
-        var extension = Path.GetExtension(projectPath).ToLowerInvariant();
-        if (extension is not (".csproj" or ".fsproj"))
+        if (!SupportedTypes.HasProjectExtension(projectPath))
         {
-            return Path.Combine(projectPath.AlignDirectorySeparators(), $"{projectName}.csproj");
+            var fileName = Path.GetFileName(projectPath);
+            return Path.Combine(projectPath.AlignDirectorySeparators(), $"{fileName}.csproj");
         }
 
         return projectPath;
