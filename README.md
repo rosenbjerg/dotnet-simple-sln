@@ -10,14 +10,8 @@ A .NET tool for cleaning up and simplyfing usage of the sln file
 dotnet tool install -g dotnet-simple-sln
 ```
 
-## Usage 
 
-```
-
-```
-
-
-# Examples
+## Examples
 
 ## Create solution from yaml specification
 
@@ -132,6 +126,6 @@ Clean up a sln file by running:
 ```
 simple-sln cleanup -i Test.sln
 ```
-Which `derive` a specification and then `create`s a sln file, overwriting the existing one, with one cleaned by this tool.
+Which will `derive` a specification and then `create`s a sln file, overwriting the existing one with one cleaned by this tool.
 
 Can optionally output the specification yaml file with the `-s` argument.
