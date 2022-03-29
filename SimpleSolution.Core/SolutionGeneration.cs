@@ -21,7 +21,7 @@ Global
 		SolutionGuid = {{{solutionId}}}
 	EndGlobalSection
 EndGlobal
-";
+".TrimNewlines();
     }
     private static string GenerateProjects(IEnumerable<SolutionReference> references)
     {

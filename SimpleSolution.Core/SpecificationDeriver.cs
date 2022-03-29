@@ -5,7 +5,7 @@ namespace SimpleSolution.Core;
 
 public static class SpecificationDeriver
 {
-    public static SolutionRootDirectory DeriveFromSolution(string solutionPath)
+    public static SolutionRootDirectory DeriveFromSolution(string solutionPath, bool keepMissingProjects)
     {
         var solutionId = Path.GetFileNameWithoutExtension(solutionPath).DeriveGuid();
         var slnContent = File.ReadAllText(solutionPath);
@@ -29,7 +29,11 @@ public static class SpecificationDeriver
             }
 
             return new SolutionReference(parentId, match.Groups[2].Value, match.Groups[3].Value.AlignDirectorySeparators(), projectId);
-        }).OrderBy(r => r.ProjectPath).GroupBy(r => r.ParentId).ToDictionary(g => g.Key, g => g.ToArray());
+        })
+            .Where(r => keepMissingProjects || r.ProjectName == r.ProjectPath || File.Exists(r.ProjectPath))
+            .OrderBy(r => r.ProjectPath)
+            .GroupBy(r => r.ParentId)
+            .ToDictionary(g => g.Key, g => g.ToArray());
 
         var solutionRootDirectory = new SolutionRootDirectory();
         Populate(solutionRootDirectory, references, solutionId);

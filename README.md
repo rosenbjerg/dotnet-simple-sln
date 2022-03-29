@@ -119,6 +119,8 @@ Derive a yaml specification file from existing sln file:
 ```
 simple-sln derive -i Test.sln
 ```
+By default, `derive` will remove references to projects that do not exist on disk. To keep these references, use the `-k` flag.
+
 The resulting yaml file will be named `Test.sln.yaml` and will be written to the same directory the input sln file.
 
 ## Cleanup sln file
@@ -127,5 +129,7 @@ Clean up a sln file by running:
 simple-sln cleanup -i Test.sln
 ```
 Which will `derive` a specification and then `create`s a sln file, overwriting the existing one with one cleaned by this tool.
+
+By default, `cleanup` will remove references to projects that do not exist on disk. To keep these references, use the `-k` flag.
 
 Can optionally output the specification yaml file with the `-s` argument.

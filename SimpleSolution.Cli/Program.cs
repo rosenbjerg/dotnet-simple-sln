@@ -44,7 +44,7 @@ internal static class Program
 
     private static int RunDeriveAndReturnExitCode(DeriveOptions options)
     {
-        var solutionSpec = SpecificationDeriver.DeriveFromSolution(options.SolutionPath);
+        var solutionSpec = SpecificationDeriver.DeriveFromSolution(options.SolutionPath, options.KeepMissingProjects);
         WriteSpecificationToFile(options.SolutionPath, solutionSpec);
 
         return 0;
@@ -52,7 +52,7 @@ internal static class Program
 
     private static int RunCleanupAndReturnExitCode(CleanupOptions options)
     {
-        var solutionRoot = SpecificationDeriver.DeriveFromSolution(options.SolutionPath);
+        var solutionRoot = SpecificationDeriver.DeriveFromSolution(options.SolutionPath, options.KeepMissingProjects);
         var solutionId = Path.GetFileNameWithoutExtension(options.SolutionPath).DeriveGuid();
         if (options.CreateSpecificationFile)
         {

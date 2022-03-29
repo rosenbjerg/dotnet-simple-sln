@@ -10,4 +10,7 @@ class CleanupOptions
     
     [Option('s', "create-spec", Required = false, HelpText = "Whether to output the solution specification to a YAML file")]
     public bool CreateSpecificationFile { get; set; }
+    
+    [Option('k', "keep-missing", Required = false, HelpText = "Keep references to missing projects")]
+    public bool KeepMissingProjects { get; set; }
 }

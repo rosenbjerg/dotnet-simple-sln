@@ -10,25 +10,38 @@
         <ToolCommandName>simple-sln</ToolCommandName>
         <PackageOutputPath>./nupkg</PackageOutputPath>
 
+        <PackageId>dotnet-simple-sln</PackageId>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageReleaseNotes>First release!</PackageReleaseNotes>
+        <PackageVersion>1.0.0</PackageVersion>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageTags>sln solution cleanup clean simplify simple yaml tool</PackageTags>
+
         <NeutralLanguage>en</NeutralLanguage>
         <RepositoryUrl>https://github.com/rosenbjerg/dotnet-simple-sln</RepositoryUrl>
         <PackageProjectUrl>https://github.com/rosenbjerg/dotnet-simple-sln</PackageProjectUrl>
         <Copyright>Malte Rosenbjerg</Copyright>
-        <Description>A .NET tool for cleaning up and simplyfing usage of the sln file</Description>
-        <PackageReleaseNotes>First release!</PackageReleaseNotes>
-        <PackageVersion>1.0.0</PackageVersion>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Description>A .NET tool for cleaning up and simplyfing usage of sln files</Description>
         <Authors>Malte Rosenbjerg</Authors>
-        <PackageTags>sln solution cleanup clean simplify simple yaml </PackageTags>
         <RepositoryType>GitHub</RepositoryType>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SimpleSolution.Core\SimpleSolution.Core.csproj" />
+        <ProjectReference Include="..\SimpleSolution.Core\SimpleSolution.Core.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="CommandLineParser" Version="2.8.0" />
+        <PackageReference Include="CommandLineParser" Version="2.8.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Test.sln.yaml">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
 </Project>
