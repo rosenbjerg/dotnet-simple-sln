@@ -2,5 +2,5 @@
 
 public class SolutionRootDirectory : SolutionDirectory
 {
-    public List<string> Configurations { get; set; } = new() { "Debug|Any CPU", "Release|Any CPU"};
+    public List<string>? Configurations { get; set; }
 }

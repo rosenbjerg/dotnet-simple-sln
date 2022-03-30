@@ -74,7 +74,8 @@ internal static class Program
 
     private static void WriteSolutionToFile(Guid solutionId, SolutionReference[] references, SolutionRootDirectory spec, string solutionPath)
     {
-        var solutionTextContent = SolutionGeneration.GenerateSolutionContent(solutionId, references, spec.Configurations);
+        var configuration = spec.Configurations ?? new List<string> { "Debug|Any CPU", "Release|Any CPU" };
+        var solutionTextContent = SolutionGeneration.GenerateSolutionContent(solutionId, references, configuration);
         File.WriteAllText(solutionPath, solutionTextContent);
         Console.WriteLine($"Solution file '{solutionPath}' updated");
     }
@@ -83,7 +84,7 @@ internal static class Program
     {
         var yamlSpecificationPath = $"{solutionPath}.yaml";
         var yamlSpecificationContent = new SerializerBuilder()
-            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitEmptyCollections)
+            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitEmptyCollections | DefaultValuesHandling.OmitNull)
             .WithNamingConvention(UnderscoredNamingConvention.Instance).Build()
             .Serialize(solutionSpec);
         
