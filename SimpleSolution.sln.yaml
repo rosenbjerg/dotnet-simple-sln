@@ -1,0 +1,7 @@
+configurations:
+- Debug|Any CPU
+- Release|Any CPU
+projects:
+- SimpleSolution.Cli
+- SimpleSolution.Core
+directories: 

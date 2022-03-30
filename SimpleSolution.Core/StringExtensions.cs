@@ -12,6 +12,7 @@ public static class StringExtensions
     {
         return input.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
     }
+
     public static string FormatGuid(this Guid guid) => guid.ToString("D").ToUpperInvariant();
 
     public static Guid DeriveGuid(this string input)
