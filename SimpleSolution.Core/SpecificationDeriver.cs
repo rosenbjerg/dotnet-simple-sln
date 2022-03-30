@@ -19,6 +19,7 @@ public static class SpecificationDeriver
         }).ToDictionary(n => n.Item1, n => n.Item2);
 
 
+        var solutionDirectory = Path.GetDirectoryName(solutionPath);
         var projectRegex = new Regex("Project\\(\"{([^}]+)}\"\\) = \"([^\"]+)\", \"([^\"]+)\", \"{([^}]+)}\"\\s*EndProject", RegexOptions.Compiled);
         var references = projectRegex.Matches(slnContent).Select(match =>
         {
@@ -30,7 +31,7 @@ public static class SpecificationDeriver
 
             return new SolutionReference(parentId, match.Groups[2].Value, match.Groups[3].Value.AlignDirectorySeparators(), projectId);
         })
-            .Where(r => keepMissingProjects || r.ProjectName == r.ProjectPath || File.Exists(r.ProjectPath))
+            .Where(r => keepMissingProjects || r.ProjectName == r.ProjectPath || File.Exists(Path.Combine(solutionDirectory!, r.ProjectPath)))
             .OrderBy(r => r.ProjectPath)
             .GroupBy(r => r.ParentId)
             .ToDictionary(g => g.Key, g => g.ToArray());
@@ -47,7 +48,6 @@ public static class SpecificationDeriver
         foreach (var solutionDirectory in subDirectories)
         {
             var subDirectory = new SolutionDirectory();
-            directory.Directories ??= new Dictionary<string, SolutionDirectory>();
             directory.Directories.Add(solutionDirectory.ProjectName, subDirectory);
             Populate(subDirectory, references, solutionDirectory.ProjectId);
         }
@@ -62,7 +62,6 @@ public static class SpecificationDeriver
 
         if (projects.Any())
         {
-            directory.Projects ??= new List<string>();
             directory.Projects.AddRange(projects);
         }
     }

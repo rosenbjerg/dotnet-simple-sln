@@ -6,7 +6,7 @@ public static class SolutionDirectoryExtensions
 {
     public static IEnumerable<SolutionReference> AggregateReferences(this SolutionDirectory solutionDirectory, Guid parentGuid)
     {
-        foreach (var project in solutionDirectory.Projects ?? new List<string>())
+        foreach (var project in solutionDirectory.Projects)
         {
             var projectName = SupportedTypes.GetFileNameWithoutProjectExtension(project);
             var projectPath = ExpandByConvention(project);
@@ -14,9 +14,9 @@ public static class SolutionDirectoryExtensions
             yield return new SolutionReference(parentGuid, projectName, projectPath.AlignDirectorySeparators(), projectGuid);
         }
 
-        foreach (var subDirectory in solutionDirectory.Directories ?? new Dictionary<string, SolutionDirectory>())
+        foreach (var subDirectory in solutionDirectory.Directories)
         {
-            var subDirectoryGuid = $"{subDirectory.Key}{parentGuid}".DeriveGuid();
+            var subDirectoryGuid = $"{parentGuid}{subDirectory.Key}".DeriveGuid();
             yield return new SolutionReference(parentGuid, subDirectory.Key, subDirectory.Key, subDirectoryGuid);
 
             foreach (var projectReference in AggregateReferences(subDirectory.Value, subDirectoryGuid))

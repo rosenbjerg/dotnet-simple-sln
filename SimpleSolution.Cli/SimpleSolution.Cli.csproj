@@ -13,7 +13,7 @@
         <PackageId>dotnet-simple-sln</PackageId>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageReleaseNotes>First release!</PackageReleaseNotes>
-        <PackageVersion>1.0.0</PackageVersion>
+        <PackageVersion>1.1.0</PackageVersion>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageTags>sln solution cleanup clean simplify simple yaml tool</PackageTags>
 
@@ -27,11 +27,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\SimpleSolution.Core\SimpleSolution.Core.csproj"/>
+        <ProjectReference Include="..\SimpleSolution.Core\SimpleSolution.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommandLineParser" Version="2.8.0"/>
+        <PackageReference Include="CommandLineParser" Version="2.8.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -41,7 +41,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="..\README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>

@@ -82,7 +82,11 @@ internal static class Program
     private static void WriteSpecificationToFile(string solutionPath, SolutionRootDirectory solutionSpec)
     {
         var yamlSpecificationPath = $"{solutionPath}.yaml";
-        var yamlSpecificationContent = new SerializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build().Serialize(solutionSpec);
+        var yamlSpecificationContent = new SerializerBuilder()
+            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitEmptyCollections)
+            .WithNamingConvention(UnderscoredNamingConvention.Instance).Build()
+            .Serialize(solutionSpec);
+        
         File.WriteAllText(yamlSpecificationPath, yamlSpecificationContent);
         Console.WriteLine($"Solution specification file '{yamlSpecificationPath}' created");
     }

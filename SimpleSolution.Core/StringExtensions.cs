@@ -16,12 +16,9 @@ public static class StringExtensions
 
     public static Guid DeriveGuid(this string input)
     {
-        var hash = GetStableHashCode(input + 347);
-        var bytes = Encoding.ASCII.GetBytes(hash.ToString());
-        var newArray = new byte[16];
-        var startAt = newArray.Length - bytes.Length;
-        Array.Copy(bytes, 0, newArray, startAt, bytes.Length);
-        return new Guid(newArray);
+        var hash = (long.MaxValue - GetStableHashCode(input)).ToString("X16");
+        var bytes = Encoding.UTF8.GetBytes(hash);
+        return new Guid(bytes);
     }
 
     // Taken from https://stackoverflow.com/a/36846609
