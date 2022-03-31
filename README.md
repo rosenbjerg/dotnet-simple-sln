@@ -1,7 +1,5 @@
 # dotnet-simple-sln
 
-# dotnet-simple-sln
-
 A .NET tool for cleaning up and simplyfing usage of the sln file
 
 
