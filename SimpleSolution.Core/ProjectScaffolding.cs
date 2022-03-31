@@ -18,7 +18,7 @@ public static class ProjectScaffolding
 
     public static void Scaffold(string directory, IEnumerable<SolutionReference> references)
     {
-        var projects = references.Where(r => r.ProjectName != r.ProjectPath);
+        var projects = references.Where(r => !r.IsProjectDirectory());
         foreach (var p in projects)
         {
             var path = Path.Combine(directory, p.ProjectPath.AlignDirectorySeparators());

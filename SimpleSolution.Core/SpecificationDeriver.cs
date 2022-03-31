@@ -15,7 +15,7 @@ public static class SpecificationDeriver
         idMap[solutionId.ToString()] = solutionId;
         var references = sln.ProjectsInOrder
             .Select(p => new SolutionReference(idMap[p.ParentProjectGuid ?? solutionId.ToString()], p.ProjectName, p.RelativePath, p.RelativePath.DeriveGuid()))
-            .Where(r => keepMissingProjects || r.ProjectName == r.ProjectPath || File.Exists(Path.Combine(solutionDirectory!, r.ProjectPath)))
+            .Where(r => keepMissingProjects || r.IsProjectDirectory() || File.Exists(Path.Combine(solutionDirectory!, r.ProjectPath)))
             .GroupBy(r => r.ParentId)
             .ToDictionary(g => g.Key, g => g.ToArray());
 
@@ -30,7 +30,7 @@ public static class SpecificationDeriver
 
     private static void Populate(SolutionDirectory directory, IReadOnlyDictionary<Guid, SolutionReference[]> references, Guid parentId)
     {
-        var subDirectories = references[parentId].Where(r => r.ProjectName == r.ProjectPath).ToArray();
+        var subDirectories = references[parentId].Where(r => r.IsProjectDirectory()).ToArray();
         foreach (var solutionDirectory in subDirectories)
         {
             var subDirectory = new SolutionDirectory();
@@ -39,7 +39,7 @@ public static class SpecificationDeriver
         }
 
         var projects = references[parentId]
-            .Where(r => r.ProjectName != r.ProjectPath)
+            .Where(r => !r.IsProjectDirectory())
             .Select(r =>
             {
                 var full = $"{r.ProjectName}{Path.DirectorySeparatorChar}{r.ProjectName}.csproj";
