@@ -34,7 +34,7 @@
         <PackageReference Include="CommandLineParser" Version="2.8.0" />
     </ItemGroup>
 
-    <ItemGroup>
+    <ItemGroup Condition="'$(Configuration)' != 'Release'">
         <None Update="Test.sln.yaml">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
