@@ -30,7 +30,7 @@ internal static class Program
 
         var solutionRoot = ParseYamlSolutionSpecification(options);
 
-        var solutionId = solutionName.DeriveGuid();
+        var solutionId = Path.GetFileName(options.SolutionSpecPath).DeriveGuid();
         var references = solutionRoot.AggregateReferences(solutionId).ToArray();
         WriteSolutionToFile(solutionId, references, solutionRoot, Path.Combine(directory, $"{solutionName}.sln"));
 
@@ -53,7 +53,7 @@ internal static class Program
     private static int RunCleanupAndReturnExitCode(CleanupOptions options)
     {
         var solutionRoot = SpecificationDeriver.DeriveFromSolution(options.SolutionPath, options.KeepMissingProjects);
-        var solutionId = Path.GetFileNameWithoutExtension(options.SolutionPath).DeriveGuid();
+        var solutionId = Path.GetFileName(options.SolutionPath).DeriveGuid();
         if (options.CreateSpecificationFile)
         {
             WriteSpecificationToFile(options.SolutionPath, solutionRoot);

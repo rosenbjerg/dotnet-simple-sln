@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Microsoft.Build.Construction;
 using SimpleSolution.Core.Models;
 
 namespace SimpleSolution.Core;
@@ -7,36 +8,21 @@ public static class SpecificationDeriver
 {
     public static SolutionRootDirectory DeriveFromSolution(string solutionPath, bool keepMissingProjects)
     {
-        var solutionId = Path.GetFileNameWithoutExtension(solutionPath).DeriveGuid();
-        var slnContent = File.ReadAllText(solutionPath);
-        var nestingSectionRegex = new Regex("GlobalSection\\(NestedProjects\\) = preSolution\\s(\\s+{[^}]+} = {[^}]+})+\\s+EndGlobalSection",
-            RegexOptions.Compiled);
-        var nestingRegex = new Regex("{([^}]+)} = {([^}]+)}", RegexOptions.Compiled);
-        var nestings = nestingSectionRegex.Matches(slnContent).SelectMany(m => m.Groups[1].Captures).Select(c =>
-        {
-            var nesting = nestingRegex.Match(c.Value);
-            return (Guid.Parse(nesting.Groups[1].Value), Guid.Parse(nesting.Groups[2].Value));
-        }).ToDictionary(n => n.Item1, n => n.Item2);
-
-
+        var sln = SolutionFile.Parse(Path.GetFullPath(solutionPath));
         var solutionDirectory = Path.GetDirectoryName(solutionPath);
-        var projectRegex = new Regex("Project\\(\"{([^}]+)}\"\\) = \"([^\"]+)\", \"([^\"]+)\", \"{([^}]+)}\"\\s*EndProject", RegexOptions.Compiled);
-        var references = projectRegex.Matches(slnContent).Select(match =>
-        {
-            var projectId = Guid.Parse(match.Groups[4].Value);
-            if (!nestings.TryGetValue(projectId, out var parentId))
-            {
-                parentId = solutionId;
-            }
-
-            return new SolutionReference(parentId, match.Groups[2].Value, match.Groups[3].Value.AlignDirectorySeparators(), projectId);
-        })
+        var solutionId = Path.GetFileName(solutionPath).DeriveGuid();
+        var idMap = sln.ProjectsInOrder.ToDictionary(p => p.ProjectGuid, p => p.RelativePath.DeriveGuid());
+        idMap[solutionId.ToString()] = solutionId;
+        var references = sln.ProjectsInOrder
+            .Select(p => new SolutionReference(idMap[p.ParentProjectGuid ?? solutionId.ToString()], p.ProjectName, p.RelativePath, p.RelativePath.DeriveGuid()))
             .Where(r => keepMissingProjects || r.ProjectName == r.ProjectPath || File.Exists(Path.Combine(solutionDirectory!, r.ProjectPath)))
-            .OrderBy(r => r.ProjectPath)
             .GroupBy(r => r.ParentId)
             .ToDictionary(g => g.Key, g => g.ToArray());
 
-        var solutionRootDirectory = new SolutionRootDirectory();
+        var solutionRootDirectory = new SolutionRootDirectory
+        {
+            Configurations = sln.SolutionConfigurations.Select(c => c.FullName).ToList()
+        };
         Populate(solutionRootDirectory, references, solutionId);
 
         return solutionRootDirectory;
